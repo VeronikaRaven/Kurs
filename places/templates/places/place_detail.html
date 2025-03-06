@@ -1,0 +1,63 @@
+{% extends 'places/base.html' %}
+
+{% block title %}Место: {{ place.title }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <a href="{% url 'places' %}" class="btn btn-outline-primary mb-3"><i class="mdi mdi-arrow-left"></i> Назад к списку</a>
+            <!-- Place Details -->
+            <h1 class="mb-3 fw-bold">{{ place.title }}</h1>
+            <p class="text-muted">
+                <i class="mdi mdi-map-marker"></i> {{ place.address }}
+            </p>
+            <div class="d-flex mb-3 align-items-center">
+                <div class="rating me-2">
+                    {% for i in "12345" %}
+                        {% if i <= place.average_rating|floatformat:0 %}
+                            <i class="mdi mdi-star"></i>
+                        {% else %}
+                            <i class="mdi mdi-star-outline"></i>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                <span>{{ place.average_rating|floatformat:1 }} ({{ place.reviews.count }} отзывов)</span>
+            </div>
+            <img src="{{ place.image.url }}" alt="{{ place.title }}" class="img-fluid rounded mb-4">
+            <p class="lead">{{ place.description }}</p>
+
+            <!-- Comment Section -->
+            <h4 class="mt-5 mb-3 fw-bold">Отзывы</h4>
+
+            {% for review in place.reviews.all %}
+            <div class="comment">
+                <div class="comment-author">{{ review.user.username }}</div>
+                <div class="comment-text">{{ review.text }}</div>
+            </div>
+            {% endfor %}
+
+            <!-- Comment Form -->
+            {% if user.is_authenticated %}
+            <div class="comment-form">
+                <h5 class="mb-3 fw-bold">Оставить отзыв</h5>
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="{{ review_form.text.id_for_label }}" class="form-label">Ваш отзыв:</label>
+                        {{ review_form.text }}
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ review_form.rating.id_for_label }}" class="form-label">Оценка:</label>
+                        {{ review_form.rating }}
+                    </div>
+                    <button type="submit" class="btn btn-primary">Отправить отзыв</button>
+                </form>
+            </div>
+            {% else %}
+            <p>Чтобы оставить отзыв, пожалуйста, <a href="{% url 'login' %}">войдите</a> или <a href="{% url 'register' %}">зарегистрируйтесь</a>.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
